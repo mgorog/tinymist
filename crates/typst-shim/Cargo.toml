@@ -20,6 +20,8 @@ comemo.workspace = true
 typst.workspace = true
 typst-syntax.workspace = true
 typst-eval.workspace = true
+typst-library = { git = "https://github.com/mgorog/typst.git", branch = "add-layout-span" }
 
 [lints]
 workspace = true
+
