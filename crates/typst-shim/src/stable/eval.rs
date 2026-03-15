@@ -1,21 +1,23 @@
 //! Typst Evaluation
 
 use comemo::Track;
-use typst::World;
 use typst::diag::SourceResult;
 use typst::engine::{Engine, Route, Sink, Traced};
 use typst::foundations::{Context, Func, Module, Value};
-use typst::introspection::Introspector;
 use typst::syntax::Source;
-
+use typst::World;
 pub use typst_eval::*;
+
+// Added imports for fixes
+use typst::introspection::Introspector;
+use typst_library::introspection::EmptyIntrospector;
+use crate::utils::Protected;
 
 /// Evaluates a source file and return the resulting module.
 pub fn eval_compat(world: &dyn World, source: &Source) -> SourceResult<Module> {
     let route = Route::default();
     let traced = Traced::default();
     let mut sink = Sink::default();
-
     typst_eval::eval(
         &typst::ROUTINES,
         world.track(),
@@ -29,13 +31,13 @@ pub fn eval_compat(world: &dyn World, source: &Source) -> SourceResult<Module> {
 /// The Typst Engine.
 pub struct TypstEngine<'a> {
     /// The introspector to be queried for elements and their positions.
-    pub introspector: Introspector,
+    pub introspector: Box<dyn Introspector>,
     /// May hold a span that is currently under inspection.
     pub traced: Traced,
     /// The route the engine took during compilation. This is used to detect
     /// cyclic imports and excessive nesting.
     pub route: Route<'static>,
-    ///  A push-only sink for delayed errors, warnings, and traced values.
+    /// A push-only sink for delayed errors, warnings, and traced values.
     ///
     /// All tracked methods of this type are of the form `(&mut self, ..) ->
     /// ()`, so in principle they do not need validation (though that
@@ -49,7 +51,7 @@ impl<'a> TypstEngine<'a> {
     /// Creates a new Typst Engine.
     pub fn new(world: &'a dyn World) -> Self {
         Self {
-            introspector: Introspector::default(),
+            introspector: Box::new(EmptyIntrospector {}),
             traced: Traced::default(),
             route: Route::default(),
             sink: Sink::default(),
@@ -62,7 +64,7 @@ impl<'a> TypstEngine<'a> {
         Engine {
             routines: &typst::ROUTINES,
             world: self.world.track(),
-            introspector: self.introspector.track(),
+            introspector: Protected::new(self.introspector.as_ref().track()),
             traced: self.traced.track(),
             sink: self.sink.track_mut(),
             route: self.route.clone(),

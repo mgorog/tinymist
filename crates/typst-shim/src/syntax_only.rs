@@ -6,10 +6,10 @@ use typst::engine::{Engine, Route, Sink, Traced};
 use typst::foundations::{Context, Func, Module, Value};
 use typst::syntax::Source;
 use typst::World;
+use typst::introspection::Introspector;
 pub use typst_eval::*;
 
 // Added imports for fixes
-use typst::introspection::Introspector;
 use typst_library::introspection::EmptyIntrospector;
 use crate::utils::Protected;
 
