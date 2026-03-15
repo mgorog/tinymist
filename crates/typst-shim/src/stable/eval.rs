@@ -6,12 +6,12 @@ use typst::engine::{Engine, Route, Sink, Traced};
 use typst::foundations::{Context, Func, Module, Value};
 use typst::syntax::Source;
 use typst::World;
+pub use typst_eval::*;
 
+// Added imports for fixes
 use typst::introspection::Introspector;
 use typst_library::introspection::EmptyIntrospector;
 use crate::utils::Protected;
-
-pub use typst_eval::*;
 
 /// Evaluates a source file and return the resulting module.
 pub fn eval_compat(world: &dyn World, source: &Source) -> SourceResult<Module> {
@@ -38,6 +38,10 @@ pub struct TypstEngine<'a> {
     /// cyclic imports and excessive nesting.
     pub route: Route<'static>,
     /// A push-only sink for delayed errors, warnings, and traced values.
+    ///
+    /// All tracked methods of this type are of the form `(&mut self, ..) ->
+    /// ()`, so in principle they do not need validation (though that
+    /// optimization is not yet implemented in comemo).
     pub sink: Sink,
     /// The environment in which typesetting occurs.
     pub world: &'a dyn World,
