@@ -1,21 +1,17 @@
 //! Typst Evaluation
 
 use comemo::Track;
-use typst::World;
 use typst::diag::SourceResult;
 use typst::engine::{Engine, Route, Sink, Traced};
 use typst::foundations::{Context, Func, Module, Value};
-use typst::introspection::Introspector;
 use typst::syntax::Source;
+use typst::World;
 pub use typst_eval::*;
 
-//ID10T start
-use crate::utils::Protected;
-//ID10T end
-
-//ID10T start
+// Added imports for fixes
+use typst::introspection::Introspector;
 use typst_library::introspection::EmptyIntrospector;
-//ID10T end
+use crate::utils::Protected;
 
 /// Evaluates a source file and return the resulting module.
 pub fn eval_compat(world: &dyn World, source: &Source) -> SourceResult<Module> {
@@ -35,9 +31,7 @@ pub fn eval_compat(world: &dyn World, source: &Source) -> SourceResult<Module> {
 /// The Typst Engine.
 pub struct TypstEngine<'a> {
     /// The introspector to be queried for elements and their positions.
-    //ID10T start
     pub introspector: Box<dyn Introspector>,
-    //ID10T end
     /// May hold a span that is currently under inspection.
     pub traced: Traced,
     /// The route the engine took during compilation. This is used to detect
@@ -57,9 +51,7 @@ impl<'a> TypstEngine<'a> {
     /// Creates a new Typst Engine.
     pub fn new(world: &'a dyn World) -> Self {
         Self {
-            //ID10T start
             introspector: Box::new(EmptyIntrospector {}),
-            //ID10T end
             traced: Traced::default(),
             route: Route::default(),
             sink: Sink::default(),
@@ -72,9 +64,7 @@ impl<'a> TypstEngine<'a> {
         Engine {
             routines: &typst::ROUTINES,
             world: self.world.track(),
-            //ID10T start
             introspector: Protected::new(self.introspector.as_ref().track()),
-            //ID10T end
             traced: self.traced.track(),
             sink: self.sink.track_mut(),
             route: self.route.clone(),
